@@ -1,23 +1,28 @@
+// Signup page UI (Stateless widget)
 import 'package:flutter/material.dart';
-import 'package:navigation_screens/provider/login_provider.dart';
 import 'package:navigation_screens/main.dart';
-import 'package:navigation_screens/screens/signup.dart';
+import 'package:navigation_screens/provider/signup_provider.dart';
+import 'package:navigation_screens/screens/loginscreen.dart';
+
 import 'package:provider/provider.dart';
 
-class LoginScreen extends StatelessWidget {
+class SignupPage extends StatelessWidget {
+  const SignupPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
+    // Access theme
     final themeProvider = Provider.of<ThemeProvider>(context);
-
+    
     return ChangeNotifierProvider(
-      create: (_) => LoginProvider(),
-      child: Consumer<LoginProvider>(
-        builder: (context, provider, _) {
+      create: (context) => SignupProvider(),
+      child: Consumer<SignupProvider>(
+        builder: (context, signupProvider, _) {
           return Scaffold(
             appBar: AppBar(
               backgroundColor: themeProvider.currentTheme.primaryColor,
               title: const Text(
-                'Login',
+                'Create Account',
                 style: TextStyle(color: Colors.white),
               ),
               centerTitle: true,
@@ -49,19 +54,21 @@ class LoginScreen extends StatelessWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              // App Logo or Icon
                               CircleAvatar(
                                 radius: 40,
-                                backgroundColor:
-                                    themeProvider.currentTheme.accentColor.withOpacity(0.2),
+                                backgroundColor: themeProvider.currentTheme.accentColor.withOpacity(0.2),
                                 child: Icon(
-                                  Icons.lock,
+                                  Icons.person_add,
                                   size: 40,
                                   color: themeProvider.currentTheme.primaryColor,
                                 ),
                               ),
                               const SizedBox(height: 24),
+                              
+                              // Title
                               Text(
-                                'Welcome Back!',
+                                'Join Us',
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
@@ -70,21 +77,51 @@ class LoginScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Login to continue',
-                                style: TextStyle(color: Colors.grey[600]),
+                                'Create your account to get started',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
                               ),
                               const SizedBox(height: 32),
+                              
+                              // Name field
                               TextField(
-                                controller: provider.emailController,
                                 decoration: InputDecoration(
-                                  labelText: 'Email',
+                                  labelText: 'Full Name',
+                                  prefixIcon: const Icon(Icons.person),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey[300]!,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: themeProvider.currentTheme.primaryColor,
+                                    ),
+                                  ),
+                                ),
+                                onChanged: signupProvider.setName,
+                              ),
+                              const SizedBox(height: 16),
+                              
+                              // Email field
+                              TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'Email Address',
                                   prefixIcon: const Icon(Icons.email),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.grey[300]!),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey[300]!,
+                                    ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -92,21 +129,36 @@ class LoginScreen extends StatelessWidget {
                                       color: themeProvider.currentTheme.primaryColor,
                                     ),
                                   ),
+                                  errorText: signupProvider.email.isNotEmpty && !signupProvider.isEmailValid() 
+                                      ? 'Please enter a valid email' 
+                                      : null,
                                 ),
                                 keyboardType: TextInputType.emailAddress,
+                                onChanged: signupProvider.setEmail,
                               ),
                               const SizedBox(height: 16),
+                              
+                              // Password field
                               TextField(
-                                controller: provider.passwordController,
                                 decoration: InputDecoration(
                                   labelText: 'Password',
                                   prefixIcon: const Icon(Icons.lock),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      signupProvider.obscurePassword 
+                                          ? Icons.visibility_off 
+                                          : Icons.visibility,
+                                    ),
+                                    onPressed: signupProvider.togglePasswordVisibility,
+                                  ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.grey[300]!),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey[300]!,
+                                    ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -114,17 +166,36 @@ class LoginScreen extends StatelessWidget {
                                       color: themeProvider.currentTheme.primaryColor,
                                     ),
                                   ),
+                                  errorText: signupProvider.password.isNotEmpty && signupProvider.password.length < 6 
+                                      ? 'Password must be at least 6 characters' 
+                                      : null,
                                 ),
-                                obscureText: true,
+                                obscureText: signupProvider.obscurePassword,
+                                onChanged: signupProvider.setPassword,
                               ),
                               const SizedBox(height: 24),
+                              
+                              // Signup button
                               SizedBox(
                                 width: double.infinity,
                                 height: 50,
                                 child: ElevatedButton(
-                                  onPressed: provider.isLoading
-                                      ? null
-                                      : () => provider.login(context),
+                                  onPressed: signupProvider.isFormValid() && !signupProvider.isLoading
+                                      ? () async {
+                                          final success = await signupProvider.signup();
+                                          if (success) {
+                                            if (context.mounted) {
+                                              // Navigate to next screen after successful signup
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>  SignupPage(),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        }
+                                      : null,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: themeProvider.currentTheme.primaryColor,
                                     foregroundColor: Colors.white,
@@ -133,7 +204,7 @@ class LoginScreen extends StatelessWidget {
                                     ),
                                     elevation: 2,
                                   ),
-                                  child: provider.isLoading
+                                  child: signupProvider.isLoading
                                       ? const SizedBox(
                                           width: 24,
                                           height: 24,
@@ -143,7 +214,7 @@ class LoginScreen extends StatelessWidget {
                                           ),
                                         )
                                       : const Text(
-                                          'LOGIN',
+                                          'SIGN UP',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
@@ -152,24 +223,28 @@ class LoginScreen extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 24),
+                              
+                              // Already have an account link
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "Don't have an account?",
-                                    style: TextStyle(color: Colors.grey[600]),
+                                    'Already have an account?',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                    ),
                                   ),
                                   TextButton(
                                     onPressed: () {
                                       Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => SignupPage(),
+                                          builder: (context) =>  LoginScreen(),
                                         ),
                                       );
                                     },
                                     child: Text(
-                                      'Sign Up',
+                                      'Log In',
                                       style: TextStyle(
                                         color: themeProvider.currentTheme.primaryColor,
                                         fontWeight: FontWeight.bold,
