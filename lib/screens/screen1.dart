@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -1055,24 +1057,4 @@ class ThemeCard extends StatelessWidget {
   }
 }
 
-// // Mock screens for navigation
-// class Screen2 extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: Text('Main Screen')),
-//       body: Center(child: Text('Welcome to SmartChatHub')),
-//     );
-//   }
-// }
-
-// class LoginScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: Text('Login')),
-//       body: Center(child: Text('Login Screen')),
-//     );
-//   }
-// }
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+
 
 // SignupProvider to handle form data and validation
 class SignupProvider with ChangeNotifier {
