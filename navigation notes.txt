@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+ void main()
+ {
+    runApp (myapp());
+ }
+ class myapp extends StatelessWidget {
+
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Two Screen Navigation',
+      initialRoute: '/',
+      routes: {
+        '/':(context) => Screen1(),
+        '/screen2':(context) =>screen2(),
+      },
+    );
+  }
+}
+
+class Screen1 extends StatelessWidget {
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title:  const Text('Screen1'),
+      ),
+      body: Center(
+        child:ElevatedButton(onPressed:(){
+          Navigator.pushNamed(context,'/screen2');
+        },
+        child:  const Text('Go To Screen 2'),
+        )
+      ),
+    );
+  }
+}
+ class screen2 extends StatelessWidget {
+ 
+
+  @override
+  Widget build(BuildContext context) {
+   return Scaffold(
+    appBar: AppBar(
+      title:  const Text('screen2'),
+    ),
+    body:Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+           const Text('Welcome to screen 2!'),
+           const SizedBox(height: 20,),
+          ElevatedButton(onPressed: ()
+          {Navigator.pop(context);
+
+          },
+          child: const  Text('Bck To Screen 1'),
+          )
+        ],
+
+      ),
+    ),
+   );
+  }
+}
